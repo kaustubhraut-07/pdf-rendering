@@ -1,100 +1,142 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+
 import { pdfjs } from "react-pdf";
 import PdfComp from "./PdfComp";
+import { Upload, notification, Button } from "antd";
+import { InboxOutlined } from "@ant-design/icons";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import PdfScroll from "./pdfScroll";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.js",
   import.meta.url
 ).toString();
 
-function App() {
-  const [title, setTitle] = useState("");
-  const [file, setFile] = useState("");
-  const [allImage, setAllImage] = useState(null);
-  const [pdfFile, setPdfFile] = useState(null);
 
-  useEffect(() => {
-    getPdf();
-  }, []);
-  const getPdf = async () => {
-    const result = await axios.get("http://localhost:5000/get-files");
-    console.log(result.data.data);
-    setAllImage(result.data.data);
+
+
+const { Dragger } = Upload;
+function App() {
+ 
+
+  
+
+  const [pdfFile, setPdfFile] = useState(null);
+  const [numPages, setNumPages] = useState(null);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [textboxPosition, setTextboxPosition] = useState({ x: 0, y: 0 });
+  const props = {
+    name: "file",
+    accept: ".pdf",
+    maxCount: 1,
+    onChange(info) {
+      const file = info.fileList[0]?.originFileObj;
+
+      if (file) {
+        if (file.type !== "application/pdf") {
+          notification.error({
+            message: "Invalid File Type",
+            description: "Only PDF files are allowed.",
+          });
+          return;
+        }
+
+        setPdfFile(URL.createObjectURL(file));
+        setPageNumber(1); 
+        // notification.success({
+        //   message: "File Uploaded",
+        //   description: "Your PDF file has been uploaded successfully.",
+        // });
+      }
+    },
+    onDrop(e) {
+      console.log("Dropped files", e.dataTransfer.files);
+    },
   };
 
-  const submitImage = async (e) => {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("file", file);
-    console.log(title, file);
+  const onDocumentLoadSuccessNumberOfPages = ( numPages ) => {
+    setNumPages(numPages);
+    console.log("Number of pages:in ap=p ", numPages);
+  };
+  
 
-    const result = await axios.post(
-      "http://localhost:5000/upload-files",
-      formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
-    );
-    console.log(result);
-    if (result.data.status == "ok") {
-      alert("Uploaded Successfully!!!");
-      getPdf();
+
+  const goToPrevPage = () => {
+    setPageNumber(page => Math.max(1,  page- 1));
+    
+  };
+
+
+  const goToNextPage = () => {
+    setPageNumber(page => Math.min(numPages, page + 1));
+    
+  };
+  const handleScroll = (event) => {
+    const { deltaY } = event;
+    if (deltaY > 0) {
+      setPageNumber((prevPage) => Math.min(numPages, prevPage + 1));
+    } else {
+      setPageNumber((prevPage) => Math.max(1, prevPage - 1));
     }
   };
-  const showPdf = (pdf) => {
-    // window.open(`http://localhost:5000/files/${pdf}`, "_blank", "noreferrer");
-    setPdfFile(`http://localhost:5000/files/${pdf}`)
+  const handlePageChange = (newPage) => {
+    setPageNumber(newPage);
   };
+ 
   return (
-    <div className="App">
-      <form className="formStyle" onSubmit={submitImage}>
-        <h4>Upload Pdf in React</h4>
-        <br />
-        <input
-          type="text"
-          className="form-control"
-          placeholder="Title"
-          required
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <br />
-        <input
-          type="file"
-          class="form-control"
-          accept="application/pdf"
-          required
-          onChange={(e) => setFile(e.target.files[0])}
-        />
-        <br />
-        <button class="btn btn-primary" type="submit">
-          Submit
-        </button>
-      </form>
-      <div className="uploaded">
-        <h4>Uploaded PDF:</h4>
-        <div className="output-div">
-          {allImage == null
-            ? ""
-            : allImage.map((data) => {
-                return (
-                  <div className="inner-div">
-                    <h6>Title: {data.title}</h6>
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => showPdf(data.pdf)}
-                    >
-                      Show Pdf
-                    </button>
-                  </div>
-                );
-              })}
-        </div>
-      </div>
-      <PdfComp pdfFile={pdfFile}/>
+    // <div className="App">
+
+    <div className="App" onScroll={handleScroll}>
+       <Dragger {...props} className="max-w-2xl p-6">
+        <p className="ant-upload-drag-icon">
+          <InboxOutlined />
+        </p>
+        <p className="ant-upload-text">
+          Click or drag file to this area to upload
+        </p>
+        <p className="ant-upload-hint">
+          Upload a PDF file (max size 10 MB).
+        </p>
+      </Dragger>
+
+      <div className="flex items-center space-x-4">
+            <Button 
+              onClick={goToPrevPage}
+              // disabled={pageNumber <= 1}
+              className="flex items-center"
+            >
+              <ChevronLeft className="w-4 h-4 mr-1" />
+              Previous
+            </Button>
+            <div className="flex items-center space-x-4">
+
+             <Button
+              onClick={goToNextPage}
+              // disabled={pageNumber >= numPages}
+              className="flex items-center"
+            >
+              Next
+              <ChevronRight className="w-4 h-4 ml-1" />
+            </Button>
+          </div>
+            </div>
+
+
+      {/* <PdfComp pdfFile={pdfFile} pageNumber = {pageNumber} onDocumentLoadSuccessNumberOfPages={onDocumentLoadSuccessNumberOfPages}/> */}
+      
+      
+      <PdfScroll pdfFile={pdfFile} pageNumber={pageNumber}
+       onDocumentLoadSuccessNumberOfPages={onDocumentLoadSuccessNumberOfPages} 
+       onPageChange={handlePageChange} 
+
+      />
+
+      
     </div>
   );
 }
 
 export default App;
+
+
+
