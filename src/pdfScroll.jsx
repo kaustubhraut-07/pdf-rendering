@@ -157,7 +157,7 @@ function PdfScroll(props) {
 
   const[modelInputText , setModalInputText] = useState();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const[modelPageNo , setModalPageNo] = useState();
+  const[modelPageNo , setModalPageNo] = useState([]);
 
 
   const onDocumentLoadSuccess = ({ numPages }) => {
@@ -281,9 +281,10 @@ function PdfScroll(props) {
     setModalInputText(placeholder);
   };
 const handleModalPageNo = (pageNo) => {
-  setModalPageNo(pageNo);
+  // setModalPageNo(pageNo);
+  setModalPageNo(prevdata => [...prevdata, pageNo]);
 }
-
+console.log(modelPageNo , "modelPageNo")
 //   console.log(currentVisiblePage , "currentVisiblePage");
   return (
     <div className="pdf-div">
@@ -307,9 +308,11 @@ const handleModalPageNo = (pageNo) => {
                   <Page pageNumber={pageNumber} renderTextLayer={false} renderAnnotationLayer={false} />
                   
                   {console.log(currentVisiblePage , "currentVisiblePage" , currentVisiblePage===Number(modelPageNo) , Number(modelPageNo) , "outside conditon")}
-                  {currentVisiblePage === 
+                  {
+                  // currentVisiblePage === 
                   // pageNumber
-                  Number(modelPageNo)
+                  // Number(modelPageNo)
+                  modelPageNo.includes(String(currentVisiblePage))
                    && (
                     <>
                     {console.log(currentVisiblePage , "currentVisiblePage" , currentVisiblePage=== Number(modelPageNo) , Number(modelPageNo) , "indie the coditon")}
