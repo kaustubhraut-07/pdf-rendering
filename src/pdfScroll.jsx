@@ -286,13 +286,58 @@ const handleModalPageNo = (pageNo) => {
 }
 console.log(modelPageNo , "modelPageNo")
 //   console.log(currentVisiblePage , "currentVisiblePage");
+
+// const handleAddTageincurrentPage = () =>{
+  
+//   // setTextBoxData(prevData => ({
+//   //   ...prevData,
+//   //   [currentVisiblePage]: {
+//   //     pageNumber: currentVisiblePage,
+//   //     x: 0, 
+//   //     y: 0, 
+//   //     text: `New Tag ${currentVisiblePage}`,
+//   //   }
+//   // }));
+//   setTextBoxData(prevData => ({
+//     ...prevData,
+//     [currentVisiblePage]: [
+//       ...(prevData?.[currentVisiblePage] || []), 
+//       {
+//         pageNumber: currentVisiblePage,
+//         x: 0,
+//         y: 0,
+//         text: `New Tag ${currentVisiblePage}`,
+//       },
+//     ],
+//   }));
+// }
+
+const handleAddTageincurrentPage = () => {
+  setTextBoxData(prevData => {
+    const currentPageData = prevData[currentVisiblePage]; // Get the current page's data
+
+    return {
+      ...prevData,
+      [currentVisiblePage]: [
+        ...(Array.isArray(currentPageData) ? currentPageData : []), // Check if it's an array
+        {
+          pageNumber: currentVisiblePage,
+          x: 0,
+          y: 0,
+          text: `New Tag ${currentVisiblePage}`,
+        },
+      ],
+    };
+  });
+};
   return (
     <div className="pdf-div">
       <p>
         Page {currentVisiblePage} of {numPages}
       </p>
       <div>
-        <button onClick={handleAddModelInput}>Open Modal</button>
+        {/* <button onClick={handleAddModelInput}>Open Modal</button> */}
+        <button onClick={handleAddTageincurrentPage}>Add Tag</button>
       </div>
       <CustomModal isOpen={isModalOpen} onClose={handleCloseModal} onAddTextbox={handleAddTextbox} onPageNo={handleModalPageNo}  />
       <Document
@@ -301,7 +346,7 @@ console.log(modelPageNo , "modelPageNo")
       >
        
         <div ref={scrollContainerRef} className="pdfPagesContainer" style={{ position: 'relative', overflowY: 'auto', overflowX: 'hidden', height: '100vh', width: '100%' }}>
-          {numPages &&
+          {/* {numPages &&
             Array.from({ length: numPages }, (_, index) => index + 1).map(
               (pageNumber) => (
                 <div key={pageNumber} className="pdfPage" style={{ marginBottom: '20px', position: 'relative' }}>
@@ -350,8 +395,99 @@ console.log(modelPageNo , "modelPageNo")
 
                 </div>
               )
-            )}
+            )} */}
+
+
+{/* {numPages &&
+  Array.from({ length: numPages }, (_, index) => index + 1).map(
+    (pageNumber) => (
+      <div
+        key={pageNumber}
+        className="pdfPage"
+        style={{ marginBottom: "20px", position: "relative" }}
+      >
+        <Page
+          pageNumber={pageNumber}
+          renderTextLayer={false}
+          renderAnnotationLayer={false}
+        />
+
+        {
+        pageNumber === textBoxData[pageNumber]?.pageNumber && (
+          <Draggable
+            axis="both"
+            handle=".handle"
+            position={{
+              x: textBoxData[pageNumber]?.x || 0,
+              y: textBoxData[pageNumber]?.y || 0,
+            }}
+            scale={1}
+            onDrag={handleDrag}
+            bounds=".pdfPage"
+          >
+            <div
+              className="handle"
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                color: "white",
+                padding: "10px",
+                cursor: "move",
+              }}
+            >
+              <input
+                type="text"
+                // value={textBoxData[pageNumber]?.text || ""}
+                onChange={handleChangeText}
+                placeholder= {textBoxData[pageNumber]?.text || ""}
+              />
+            </div>
+          </Draggable>
+        )}
+      </div>
+    )
+  )} */}
+
+{numPages &&
+  Array.from({ length: numPages }, (_, index) => index + 1).map(
+    (pageNumber) => (
+      <div key={pageNumber} className="pdfPage" style={{ marginBottom: "20px", position: "relative" }}>
+        <Page pageNumber={pageNumber} renderTextLayer={false} renderAnnotationLayer={false} />
+
+        {(textBoxData[pageNumber]?.length > 0) && textBoxData[pageNumber].map((tagData, index) => ( // Check if textBoxData[pageNumber] exists
+                  <Draggable
+                    key={index} // Use index as key for now (improve later if needed)
+                    axis="both"
+                    handle=".handle"
+                    position={{ x: tagData.x, y: tagData.y }}
+                    scale={1}
+                    onDrag={(e, data) => { // Update drag handler
+                      const updatedTags = [...textBoxData[pageNumber]];
+                      updatedTags[index] = { ...tagData, x: data.x, y: data.y };
+                      setTextBoxData(prev => ({ ...prev, [pageNumber]: updatedTags }));
+                    }}
+                    bounds=".pdfPage"
+                  >
+                    <div className="handle" style={{ position: "absolute", top: 0, left: 0, color: "white", padding: "10px", cursor: "move" }}>
+                      <input
+                        type="text"
+                        value={tagData.text}
+                        onChange={(e) => { // Update change handler
+                          const updatedTags = [...textBoxData[pageNumber]];
+                          updatedTags[index] = { ...tagData, text: e.target.value };
+                          setTextBoxData(prev => ({ ...prev, [pageNumber]: updatedTags }));
+                        }}
+                        placeholder="Enter text here"
+                      />
+                    </div>
+                  </Draggable>
+                ))}
+              </div>
+            )
+          )}
         </div>
+        
 
       </Document>
       <button onClick={generateJSONFile} style={{ margin: '10px', padding: '10px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
