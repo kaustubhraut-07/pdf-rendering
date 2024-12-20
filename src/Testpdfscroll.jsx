@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Document, Page } from "react-pdf";
 import Draggable from "react-draggable";
-import CustomModal from "./Modal"; 
+import CustomModal from "./Modal"; // Import your Modal component if needed
 
 function TestPdfScroll(props) {
   const [numPages, setNumPages] = useState(null);
@@ -9,9 +9,11 @@ function TestPdfScroll(props) {
   const [textBoxData, setTextBoxData] = useState({});
   const scrollContainerRef = useRef(null);
 
+  // Modal State (If you are using a modal)
   const [modelInputText, setModalInputText] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modelPageNo, setModalPageNo] = useState([]);
+
 
   const onDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages);
@@ -41,7 +43,6 @@ function TestPdfScroll(props) {
     if (!scrollContainerRef.current) return;
     const container = scrollContainerRef.current;
     const pages = container.getElementsByClassName('pdfPage');
-    const containerTop = container.scrollTop;
 
     let maxVisibleHeight = 0;
     let mostVisiblePage = 1;
@@ -76,15 +77,14 @@ function TestPdfScroll(props) {
 
   const handleAddTageincurrentPage = () => {
     setTextBoxData(prevData => {
-      const currentPageData = prevData[currentVisiblePage];
       return {
         ...prevData,
         [currentVisiblePage]: [
-          ...(Array.isArray(currentPageData) ? currentPageData : []),
+          ...(prevData[currentVisiblePage] || []),
           {
             pageNumber: currentVisiblePage,
-            x: 0, 
-            y: 0, 
+            x: 0,
+            y: 0,
             text: `New Tag ${currentVisiblePage}`,
           },
         ],
@@ -116,21 +116,22 @@ function TestPdfScroll(props) {
     URL.revokeObjectURL(tempUrl);
   };
 
-  const handleAddModelInput = () => {
-    setIsModalOpen(true);
-  };
+  // Modal Handlers (If you need them)
+//   const handleAddModelInput = () => {
+//     setIsModalOpen(true);
+//   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
+//   const handleCloseModal = () => {
+//     setIsModalOpen(false);
+//   };
 
-  const handleAddTextbox = (placeholder) => {
-    setModalInputText(placeholder);
-  };
+//   const handleAddTextbox = (placeholder) => {
+//     setModalInputText(placeholder);
+//   };
 
-  const handleModalPageNo = (pageNo) => {
-    setModalPageNo(prevdata => [...prevdata, pageNo]);
-  };
+//   const handleModalPageNo = (pageNo) => {
+//     setModalPageNo(prevdata => [...prevdata, pageNo]);
+//   };
 
   return (
     <div className="pdf-div">
@@ -140,7 +141,8 @@ function TestPdfScroll(props) {
       <div>
         <button onClick={handleAddTageincurrentPage}>Add Tag</button>
       </div>
-      <CustomModal isOpen={isModalOpen} onClose={handleCloseModal} onAddTextbox={handleAddTextbox} onPageNo={handleModalPageNo} />
+  
+      {/* {isModalOpen && <CustomModal isOpen={isModalOpen} onClose={handleCloseModal} onAddTextbox={handleAddTextbox} onPageNo={handleModalPageNo} />} */}
 
       <Document file={props.pdfFile} onLoadSuccess={onDocumentLoadSuccess}>
         <div ref={scrollContainerRef} className="pdfPagesContainer" style={{ position: 'relative', overflowY: 'auto', overflowX: 'hidden', height: '100vh', width: '100%' }}>
@@ -154,17 +156,17 @@ function TestPdfScroll(props) {
                     key={`${pageNumber}-${index}`}
                     axis="both"
                     handle=".handle"
-                    position={{ x: tagData.x || 0, y: tagData.y || 0 }}
+                    position={{ x: tagData.x, y: tagData.y }}
                     scale={1}
                     onDrag={(e, data) => updateTextBoxData(pageNumber, index, { x: data.x, y: data.y })}
                     bounds=".pdfPage"
                   >
-                    <div className="handle" style={{ position: "absolute", top: 0, left: 0, color: "white", cursor: "move", border:"1px solid black"}}> 
+                    <div className="handle" style={{ position: "absolute", top: 0, left: 0, color: "white", cursor: "move" , border : "1px solid black"}}>
                       <input
                         type="text"
                         // value={tagData.text}
                         onChange={(e) => updateTextBoxData(pageNumber, index, { text: e.target.value })}
-                        placeholder={textBoxData[pageNumber]?.[index]?.text || ""}
+                        placeholder={tagData.text}
                         style={{background:"transparent" , border:"none" , outline:"none" , color:"black"}}
                       />
                     </div>
