@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Document, Page } from "react-pdf";
 import Draggable from "react-draggable";
-import CustomModal from "./Modal"; // Import your Modal component if needed
+import CustomModal from "./Modal"; 
+import { Button } from "antd";
 
 function TestPdfScroll(props) {
   const [numPages, setNumPages] = useState(null);
@@ -9,10 +10,12 @@ function TestPdfScroll(props) {
   const [textBoxData, setTextBoxData] = useState({});
   const scrollContainerRef = useRef(null);
 
-  // Modal State (If you are using a modal)
+
   const [modelInputText, setModalInputText] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modelPageNo, setModalPageNo] = useState([]);
+
+  const [tagCount, setTagCount] = useState(0);
 
 
   const onDocumentLoadSuccess = ({ numPages }) => {
@@ -77,15 +80,18 @@ function TestPdfScroll(props) {
 
   const handleAddTageincurrentPage = () => {
     setTextBoxData(prevData => {
+      const newTag = `Tag ${tagCount + 1}`;
+      setTagCount(tagCount + 1);
       return {
         ...prevData,
         [currentVisiblePage]: [
           ...(prevData[currentVisiblePage] || []),
+        
           {
             pageNumber: currentVisiblePage,
             x: 0,
             y: 0,
-            text: `New Tag ${currentVisiblePage}`,
+            text: newTag,
           },
         ],
       };
@@ -116,22 +122,22 @@ function TestPdfScroll(props) {
     URL.revokeObjectURL(tempUrl);
   };
 
-  // Modal Handlers (If you need them)
-//   const handleAddModelInput = () => {
-//     setIsModalOpen(true);
-//   };
 
-//   const handleCloseModal = () => {
-//     setIsModalOpen(false);
-//   };
+  const handleAddModelInput = () => {
+    setIsModalOpen(true);
+  };
 
-//   const handleAddTextbox = (placeholder) => {
-//     setModalInputText(placeholder);
-//   };
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
 
-//   const handleModalPageNo = (pageNo) => {
-//     setModalPageNo(prevdata => [...prevdata, pageNo]);
-//   };
+  const handleAddTextbox = (placeholder) => {
+    setModalInputText(placeholder);
+  };
+
+  const handleModalPageNo = (pageNo) => {
+    setModalPageNo(prevdata => [...prevdata, pageNo]);
+  };
 
   return (
     <div className="pdf-div">
@@ -139,7 +145,7 @@ function TestPdfScroll(props) {
         Page {currentVisiblePage} of {numPages}
       </p>
       <div>
-        <button onClick={handleAddTageincurrentPage}>Add Tag</button>
+        <Button type="primary" onClick={handleAddTageincurrentPage}>Add Tag</Button>
       </div>
   
       {/* {isModalOpen && <CustomModal isOpen={isModalOpen} onClose={handleCloseModal} onAddTextbox={handleAddTextbox} onPageNo={handleModalPageNo} />} */}
@@ -164,9 +170,10 @@ function TestPdfScroll(props) {
                     <div className="handle" style={{ position: "absolute", top: 0, left: 0, color: "white", cursor: "move" , border : "1px solid black"}}>
                       <input
                         type="text"
+                        value={tagData.text}
                         // value={tagData.text}
                         onChange={(e) => updateTextBoxData(pageNumber, index, { text: e.target.value })}
-                        placeholder={tagData.text}
+                        readOnly
                         style={{background:"transparent" , border:"none" , outline:"none" , color:"black"}}
                       />
                     </div>
