@@ -150,12 +150,14 @@ function TestPdfScroll(props) {
   
       {/* {isModalOpen && <CustomModal isOpen={isModalOpen} onClose={handleCloseModal} onAddTextbox={handleAddTextbox} onPageNo={handleModalPageNo} />} */}
 
-      <Document file={props.pdfFile} onLoadSuccess={onDocumentLoadSuccess}>
+      <Document file={props.pdfFile} onLoadSuccess={onDocumentLoadSuccess}  > 
         <div ref={scrollContainerRef} className="pdfPagesContainer" style={{ position: 'relative', overflowY: 'auto', overflowX: 'hidden', height: '100vh', width: '100%' }}>
           {numPages &&
             Array.from({ length: numPages }, (_, index) => index + 1).map((pageNumber) => (
               <div key={pageNumber} className="pdfPage" style={{ marginBottom: "20px", position: "relative" }}>
-                <Page pageNumber={pageNumber} renderTextLayer={false} renderAnnotationLayer={false} />
+                <Page pageNumber={pageNumber} renderTextLayer={false} renderAnnotationLayer={false} 
+                width={800}
+               height={1100} />
 
                 {textBoxData[pageNumber]?.map((tagData, index) => (
                   <Draggable
@@ -167,14 +169,21 @@ function TestPdfScroll(props) {
                     onDrag={(e, data) => updateTextBoxData(pageNumber, index, { x: data.x, y: data.y })}
                     bounds=".pdfPage"
                   >
-                    <div className="handle" style={{ position: "absolute", top: 0, left: 0, color: "white", cursor: "move" , border : "1px solid black"}}>
+                    <div className="handle" style={{ position: "absolute", top: 0, left: 0, color: "white", cursor: "move" , 
+                    // border : "1px solid black"
+                    border : "1px solid white"
+
+                    }}>
                       <input
                         type="text"
                         value={tagData.text}
                         // value={tagData.text}
                         onChange={(e) => updateTextBoxData(pageNumber, index, { text: e.target.value })}
                         readOnly
-                        style={{background:"transparent" , border:"none" , outline:"none" , color:"black"}}
+                        style={{background:"transparent" , border:"none" , outline:"none" , 
+                          // color:"black",
+                          color:"white"
+                        }}
                       />
                     </div>
                   </Draggable>
