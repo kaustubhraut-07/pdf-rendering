@@ -14,6 +14,7 @@ function TestPdfScroll(props) {
   const [modelInputText, setModalInputText] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modelPageNo, setModalPageNo] = useState([]);
+  const [pageDimensions, setPageDimensions] = useState({});
 
   const [tagCount, setTagCount] = useState(0);
 
@@ -46,6 +47,7 @@ function TestPdfScroll(props) {
     if (!scrollContainerRef.current) return;
     const container = scrollContainerRef.current;
     const pages = container.getElementsByClassName('pdfPage');
+    // console.log(pages , "pages");
 
     let maxVisibleHeight = 0;
     let mostVisiblePage = 1;
@@ -107,6 +109,8 @@ function TestPdfScroll(props) {
         text: tag.text,
         textSize: 16,
         textColor: { r: 0, g: 0, b: 0 },
+        width: pageDimensions[pageNumber]?.width || null, 
+        height: pageDimensions[pageNumber]?.height || null,
       }))
     );
 
@@ -139,6 +143,16 @@ function TestPdfScroll(props) {
     setModalPageNo(prevdata => [...prevdata, pageNo]);
   };
 
+  const handlePageLoadSuccess = (page, pageNumber) => {
+    const { width, height } = page;
+    setPageDimensions((prev) => ({
+      ...prev,
+      [pageNumber]: { width, height },
+    }));
+    console.log(`Page ${pageNumber} dimensions:`, { width, height });
+  };
+  
+
   return (
     <div className="pdf-div">
       <p>
@@ -151,13 +165,16 @@ function TestPdfScroll(props) {
       {/* {isModalOpen && <CustomModal isOpen={isModalOpen} onClose={handleCloseModal} onAddTextbox={handleAddTextbox} onPageNo={handleModalPageNo} />} */}
 
       <Document file={props.pdfFile} onLoadSuccess={onDocumentLoadSuccess}  > 
-        <div ref={scrollContainerRef} className="pdfPagesContainer" style={{ position: 'relative', overflowY: 'auto', overflowX: 'hidden', height: '100vh', width: '100%' }}>
+        <div ref={scrollContainerRef} className="pdfPagesContainer" style={{ position: 'relative', overflowY: 'auto', overflowX: 'hidden', height: '100vh',width:"100%", overflow : 'auto' }}> 
+          {/* , height: '100vh', width: '100%' */}
           {numPages &&
             Array.from({ length: numPages }, (_, index) => index + 1).map((pageNumber) => (
-              <div key={pageNumber} className="pdfPage" style={{ marginBottom: "20px", position: "relative" }}>
+              <div key={pageNumber} className="pdfPage" style={{ position: "relative" }}>
                 <Page pageNumber={pageNumber} renderTextLayer={false} renderAnnotationLayer={false} 
                 width={800}
-               height={1100} />
+                height={1100} 
+                onLoadSuccess={(page) => handlePageLoadSuccess(page, pageNumber)}
+               />
 
                 {textBoxData[pageNumber]?.map((tagData, index) => (
                   <Draggable
@@ -171,7 +188,9 @@ function TestPdfScroll(props) {
                   >
                     <div className="handle" style={{ position: "absolute", top: 0, left: 0, color: "white", cursor: "move" , 
                     // border : "1px solid black"
-                    border : "1px solid white"
+                    border : "1px solid white",
+                    overflow:'auto',
+                    // zIndex:1000
 
                     }}>
                       <input
