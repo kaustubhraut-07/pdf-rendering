@@ -165,7 +165,7 @@ function TestPdfScroll(props) {
       {/* {isModalOpen && <CustomModal isOpen={isModalOpen} onClose={handleCloseModal} onAddTextbox={handleAddTextbox} onPageNo={handleModalPageNo} />} */}
 
       <Document file={props.pdfFile} onLoadSuccess={onDocumentLoadSuccess}  > 
-        <div ref={scrollContainerRef} className="pdfPagesContainer" style={{ position: 'relative', overflowY: 'auto', overflowX: 'hidden', height: '100vh',width:"100%", overflow : 'auto' }}> 
+        <div ref={scrollContainerRef} className="pdfPagesContainer" style={{ position: 'relative', overflowY: 'auto', overflowX: 'hidden', height: '100vh',width:"80%", overflow : 'auto' }}> 
           {/* , height: '100vh', width: '100%' */}
           {numPages &&
             Array.from({ length: numPages }, (_, index) => index + 1).map((pageNumber) => (
@@ -173,10 +173,13 @@ function TestPdfScroll(props) {
                 <Page pageNumber={pageNumber} renderTextLayer={false} renderAnnotationLayer={false} 
                 width={595} // Width in points
                 height={841} // height in points
+                // height={1100}
                 onLoadSuccess={(page) => handlePageLoadSuccess(page, pageNumber)}
                />
-
+    {console.log("page dimensions", pageDimensions[pageNumber]?.width   )}
                 {textBoxData[pageNumber]?.map((tagData, index) => (
+                  <>
+                  {console.log("tagData", tagData)}
                   <Draggable
                     key={`${pageNumber}-${index}`}
                     axis="both"
@@ -186,8 +189,16 @@ function TestPdfScroll(props) {
                       // pageDimensions[pageNumber]?.height - tagData.height 
                     }}
                     scale={1}
+                    bounds= {{
+                      left: 0,
+                      top: 0,
+                      right: pageDimensions[pageNumber]?.width  || 0,
+                      bottom: pageDimensions[pageNumber]?.height  || 0,
+                    }}
                     onDrag={(e, data) => updateTextBoxData(pageNumber, index, { x: data.x, y: data.y })}
-                    bounds=".pdfPage"
+                    // bounds=".pdfPage"
+                    // bounds="parent"
+                    
                   >
                  
                     <div className="handle" style={{ position: "absolute",
@@ -215,8 +226,10 @@ function TestPdfScroll(props) {
                       />
                     </div>
                   </Draggable>
+                  </>
                 ))}
               </div>
+            
             ))}
         </div>
       </Document>
