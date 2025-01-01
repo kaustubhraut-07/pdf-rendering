@@ -171,8 +171,8 @@ function TestPdfScroll(props) {
             Array.from({ length: numPages }, (_, index) => index + 1).map((pageNumber) => (
               <div key={pageNumber} className="pdfPage" style={{ position: "relative" }}>
                 <Page pageNumber={pageNumber} renderTextLayer={false} renderAnnotationLayer={false} 
-                width={800}
-                height={1100} 
+                width={595} // Width in points
+                height={841} // height in points
                 onLoadSuccess={(page) => handlePageLoadSuccess(page, pageNumber)}
                />
 
@@ -181,28 +181,37 @@ function TestPdfScroll(props) {
                     key={`${pageNumber}-${index}`}
                     axis="both"
                     handle=".handle"
-                    position={{ x: tagData.x, y: tagData.y }}
+                    position={{ x: tagData.x, y: 
+                      tagData.y 
+                      // pageDimensions[pageNumber]?.height - tagData.height 
+                    }}
                     scale={1}
                     onDrag={(e, data) => updateTextBoxData(pageNumber, index, { x: data.x, y: data.y })}
                     bounds=".pdfPage"
                   >
-                    <div className="handle" style={{ position: "absolute", top: 0, left: 0, color: "white", cursor: "move" , 
+                 
+                    <div className="handle" style={{ position: "absolute",
+                     top: 0, left: 0, 
+                     color: "white", cursor: "move" , 
                     // border : "1px solid black"
                     border : "1px solid white",
                     overflow:'auto',
                     // zIndex:1000
 
                     }}>
+                       {/* {console.log("x and y postions", tagData.x, pageDimensions[pageNumber]?.height - tagData.height)} */}
                       <input
                         type="text"
                         value={tagData.text}
                         // value={tagData.text}
                         onChange={(e) => updateTextBoxData(pageNumber, index, { text: e.target.value })}
                         readOnly
+                        // size={tagData.text.length } 
                         style={{background:"transparent" , border:"none" , outline:"none" , 
                           // color:"black",
                           color:"white"
                         }}
+                        
                       />
                     </div>
                   </Draggable>
