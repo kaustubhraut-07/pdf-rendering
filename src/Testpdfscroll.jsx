@@ -192,8 +192,8 @@ function TestPdfScroll(props) {
                     bounds= {{
                       left: 0,
                       top: 0,
-                      right: pageDimensions[pageNumber]?.width  || 0,
-                      bottom: pageDimensions[pageNumber]?.height  || 0,
+                      right: pageDimensions[pageNumber]?.width - 185 || 0,
+                      bottom: pageDimensions[pageNumber]?.height - 26 || 0,
                     }}
                     onDrag={(e, data) => updateTextBoxData(pageNumber, index, { x: data.x, y: data.y })}
                     // bounds=".pdfPage"
