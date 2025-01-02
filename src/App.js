@@ -7,6 +7,7 @@ import { InboxOutlined } from "@ant-design/icons";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import PdfScroll from "./pdfScroll";
 import TestPdfScroll from "./Testpdfscroll.jsx";
+import TestPdfScroll1 from "./Testpdfscroll1.jsx";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.js",
@@ -131,10 +132,17 @@ function App() {
        onPageChange={handlePageChange} 
 
       /> */}
+
       <TestPdfScroll
 pdfFile={pdfFile} pageNumber={pageNumber}
 onDocumentLoadSuccessNumberOfPages={onDocumentLoadSuccessNumberOfPages} 
 onPageChange={handlePageChange} />
+
+
+{/* <TestPdfScroll1
+pdfFile={pdfFile} pageNumber={pageNumber}
+onDocumentLoadSuccessNumberOfPages={onDocumentLoadSuccessNumberOfPages} 
+onPageChange={handlePageChange} /> */}
       
     </div>
   );
