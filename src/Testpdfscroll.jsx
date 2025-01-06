@@ -165,7 +165,7 @@ function TestPdfScroll(props) {
       {/* {isModalOpen && <CustomModal isOpen={isModalOpen} onClose={handleCloseModal} onAddTextbox={handleAddTextbox} onPageNo={handleModalPageNo} />} */}
 
       <Document file={props.pdfFile} onLoadSuccess={onDocumentLoadSuccess}  > 
-        <div ref={scrollContainerRef} className="pdfPagesContainer" style={{ position: 'relative', overflowY: 'auto', overflowX: 'hidden', height: '100vh',width:"80%", overflow : 'auto' }}> 
+        <div ref={scrollContainerRef} className="pdfPagesContainer" style={{ position: 'relative', overflowY: 'auto', overflowX: 'hidden', height: '100vh',width:"100%", overflow : 'auto' }}> 
           {/* , height: '100vh', width: '100%' */}
           {numPages &&
             Array.from({ length: numPages }, (_, index) => index + 1).map((pageNumber) => (
@@ -189,11 +189,19 @@ function TestPdfScroll(props) {
                       // pageDimensions[pageNumber]?.height - tagData.height 
                     }}
                     scale={1}
-                    bounds= {{
-                      left: 0,
+                    
+                    // bounds= {{
+                    //   left: 0,
+                    //   top: 0,
+                    //   right: pageDimensions[pageNumber]?.width - 185 || 0,
+                    //   bottom: pageDimensions[pageNumber]?.height - 26 || 0,
+                    // }}
+
+                    bounds={{
+                      left: 0, // Allow movement to the left beyond 0
                       top: 0,
-                      right: pageDimensions[pageNumber]?.width - 185 || 0,
-                      bottom: pageDimensions[pageNumber]?.height - 26 || 0,
+                      right: pageDimensions[pageNumber]?.width - 52 || 0, //tagData.width 
+                      bottom: pageDimensions[pageNumber]?.height - 26 || 0, // tagData.height
                     }}
                     onDrag={(e, data) => updateTextBoxData(pageNumber, index, { x: data.x, y: data.y })}
                     // bounds=".pdfPage"
@@ -203,11 +211,14 @@ function TestPdfScroll(props) {
                  
                     <div className="handle" style={{ position: "absolute",
                      top: 0, left: 0, 
+                     margin: "0px", padding: "0px",
                      color: "white", cursor: "move" , 
                     // border : "1px solid black"
                     border : "1px solid white",
                     overflow:'auto',
                     // zIndex:1000
+
+                    
 
                     }}>
                        {/* {console.log("x and y postions", tagData.x, pageDimensions[pageNumber]?.height - tagData.height)} */}
@@ -219,8 +230,13 @@ function TestPdfScroll(props) {
                         readOnly
                         // size={tagData.text.length } 
                         style={{background:"transparent" , border:"none" , outline:"none" , 
-                          // color:"black",
-                          color:"white"
+                          color:"black",
+                          // color:"white",
+                          margin: "0px",
+                          padding: "0px",
+                          width: `${tagData.width || tagData.text.length * 10}px`, 
+                          height: `${tagData.height || 20}px`,
+                          
                         }}
                         
                       />
