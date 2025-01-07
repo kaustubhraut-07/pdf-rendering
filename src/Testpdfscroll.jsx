@@ -2,7 +2,9 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Document, Page } from "react-pdf";
 import Draggable from "react-draggable";
 import CustomModal from "./Modal"; 
-import { Button } from "antd";
+import { Button ,notification,Upload} from "antd";
+import { DeleteOutlined,InboxOutlined } from "@ant-design/icons";
+import axios from "axios";
 
 function TestPdfScroll(props) {
   const [numPages, setNumPages] = useState(null);
@@ -18,6 +20,42 @@ function TestPdfScroll(props) {
 
   const [tagCount, setTagCount] = useState(0);
 
+const[csvFile , setcsvFile ]  = useState();
+
+
+  const { Dragger } = Upload;
+  const draggerprops = {
+    name: "file",
+    accept: ".csv",
+    maxCount: 1,
+    onChange(info) {
+      const file = info.fileList[0]?.originFileObj;
+  
+      if (file) {
+        const fileExtension = file.name.split('.').pop().toLowerCase();
+        if (fileExtension !== "csv") {
+          notification.error({
+            message: "Invalid File Type",
+            description: "Only CSV files are allowed.",
+          });
+          return;
+        }
+        setcsvFile(file);
+        // setPdfFile(URL.createObjectURL(file));
+        // setPageNumber(1);
+        // notification.success({
+        //   message: "File Uploaded",
+        //   description: "Your csv file has been uploaded successfully.",
+        // });
+      }
+    },
+    onDrop(e) {
+      console.log("Dropped files", e.dataTransfer.files);
+    },
+  };
+
+
+console.log("csv file", csvFile);
 
   const onDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages);
@@ -115,15 +153,16 @@ function TestPdfScroll(props) {
     );
 
     const fileData = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' });
-    const tempUrl = URL.createObjectURL(fileData);
+    // const tempUrl = URL.createObjectURL(fileData);
 
-    const link = document.createElement('a');
-    link.href = tempUrl;
-    link.download = 'scroll_data.json';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(tempUrl);
+    // const link = document.createElement('a');
+    // link.href = tempUrl;
+    // link.download = 'scroll_data.json';
+    // document.body.appendChild(link);
+    // link.click();
+    // document.body.removeChild(link);
+    // URL.revokeObjectURL(tempUrl);
+    return fileData;
   };
 
 
@@ -151,10 +190,64 @@ function TestPdfScroll(props) {
     }));
     console.log(`Page ${pageNumber} dimensions:`, { width, height });
   };
-  
+
+  const handleRemoveInputTag = ()=>{
+    console.log("remove tag",textBoxData[currentVisiblePage]);
+
+    setTagCount(tagCount - 1);
+    setTextBoxData(prevData => {
+      const updatedPageData = [...(prevData[currentVisiblePage] || [])];
+      updatedPageData.pop();
+      return { ...prevData, [currentVisiblePage]: updatedPageData };
+    });
+
+
+
+  }
+  console.log(tagCount , "tag count");
+
+  const handleGeneratePdf = async() => {
+    try {
+      const jsonData = generateJSONFile();
+      console.log("jsonData" ,  jsonData);
+      
+      const formData = new FormData();
+      formData.append('pdf_file', props.pdfFile);
+      formData.append('csv_file', csvFile);
+      // formData.append('json_file', jsonData);
+      // const jsonBlob = new Blob([JSON.stringify(jsonData)], { type: 'application/json' });
+      formData.append('json_file', jsonData, 'data.json');
+      console.log(props.pdfFile, csvFile, jsonData);
+      console.log("formData", formData.values());
+      const res = await axios.post(process.env.REACT_APP_API_URL, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        }});
+      console.log("res", res);
+    } catch (error) {
+
+        console.log("error", error);
+    }
+  }
 
   return (
     <div className="pdf-div">
+
+      <Dragger {...draggerprops} className="max-w-2xl p-6" >
+      <p className="ant-upload-drag-icon">
+          <InboxOutlined />
+        </p>
+        <p className="ant-upload-text">
+          Click or drag file to this area to upload
+        </p>
+        <p className="ant-upload-hint">
+          Upload a csv file (max size 10 MB).
+        </p>
+      </Dragger>
+
+
+
+
       <p>
         Page {currentVisiblePage} of {numPages}
       </p>
@@ -217,7 +310,7 @@ function TestPdfScroll(props) {
                     border : "1px solid white",
                     overflow:'auto',
                     // zIndex:1000
-
+                    // cursor:"drag",
                     
 
                     }}>
@@ -230,16 +323,20 @@ function TestPdfScroll(props) {
                         readOnly
                         // size={tagData.text.length } 
                         style={{background:"transparent" , border:"none" , outline:"none" , 
-                          color:"black",
-                          // color:"white",
+                          // color:"black",
+                          color:"white",
                           margin: "0px",
                           padding: "0px",
                           width: `${tagData.width || tagData.text.length * 10}px`, 
                           height: `${tagData.height || 20}px`,
+                         
                           
                         }}
                         
                       />
+                      <div style={{cursor:"pointer" , display:"inline-block"}} onClick={handleRemoveInputTag}>
+                      <DeleteOutlined />
+                      </div>
                     </div>
                   </Draggable>
                   </>
@@ -249,8 +346,12 @@ function TestPdfScroll(props) {
             ))}
         </div>
       </Document>
-      <button onClick={generateJSONFile} style={{ margin: '10px', padding: '10px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
+      {/* <button onClick={generateJSONFile} style={{ margin: '10px', padding: '10px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
         Download JSON
+      </button> */}
+
+      <button onClick={handleGeneratePdf} style={{ margin: '10px', padding: '10px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
+        Generate PDF
       </button>
     </div>
   );

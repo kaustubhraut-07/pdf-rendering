@@ -27,6 +27,8 @@ function App() {
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [textboxPosition, setTextboxPosition] = useState({ x: 0, y: 0 });
+
+  
   const props = {
     name: "file",
     accept: ".pdf",
@@ -100,6 +102,8 @@ function App() {
           Upload a PDF file (max size 10 MB).
         </p>
       </Dragger>
+
+    
 
       <div className="flex items-center space-x-4">
             <Button 
