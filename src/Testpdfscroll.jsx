@@ -210,9 +210,9 @@ console.log("csv file", csvFile);
     try {
       const jsonData = generateJSONFile();
       console.log("jsonData" ,  jsonData);
-      
+      const pdffile =  await fetch(props.pdfFile).then(r => r.blob()); /// converting to blog again from url
       const formData = new FormData();
-      formData.append('pdf_file', props.pdfFile);
+      formData.append('pdf_file', pdffile);
       formData.append('csv_file', csvFile);
       // formData.append('json_file', jsonData);
       // const jsonBlob = new Blob([JSON.stringify(jsonData)], { type: 'application/json' });
