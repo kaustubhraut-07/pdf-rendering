@@ -35,7 +35,7 @@ function App() {
     maxCount: 1,
     onChange(info) {
       const file = info.fileList[0]?.originFileObj;
-
+      // localStorage.clear();
       if (file) {
         if (file.type !== "application/pdf") {
           notification.error({

@@ -63,14 +63,15 @@ console.log("csv file", csvFile);
   };
 
   useEffect(() => {
-    const storedData = localStorage.getItem("pdfTextBoxData");
+    const storedData = sessionStorage.getItem("pdfTextBoxData");
     if (storedData) {
       setTextBoxData(JSON.parse(storedData));
     }
+    
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("pdfTextBoxData", JSON.stringify(textBoxData));
+    sessionStorage.setItem("pdfTextBoxData", JSON.stringify(textBoxData));
   }, [textBoxData]);
 
   const updateTextBoxData = (pageNumber, index, newData) => {
@@ -112,10 +113,12 @@ console.log("csv file", csvFile);
 
   useEffect(() => {
     const container = scrollContainerRef.current;
+    
     if (container) {
       container.addEventListener('scroll', handleScroll);
       return () => container.removeEventListener('scroll', handleScroll);
     }
+    
   }, [handleScroll]);
 
   const handleAddTageincurrentPage = () => {
@@ -231,8 +234,7 @@ console.log("csv file", csvFile);
   }
 
   return (
-    <div className="pdf-div">
-
+    <div>
       <Dragger {...draggerprops} className="max-w-2xl p-6" >
       <p className="ant-upload-drag-icon">
           <InboxOutlined />
@@ -251,12 +253,16 @@ console.log("csv file", csvFile);
       <p>
         Page {currentVisiblePage} of {numPages}
       </p>
+  
+    <div className="pdf-div">
+
+      
       <div>
         <Button type="primary" onClick={handleAddTageincurrentPage}>Add Tag</Button>
       </div>
   
       {/* {isModalOpen && <CustomModal isOpen={isModalOpen} onClose={handleCloseModal} onAddTextbox={handleAddTextbox} onPageNo={handleModalPageNo} />} */}
-
+    {console.log(props.pdfFile , "props file")}
       <Document file={props.pdfFile} onLoadSuccess={onDocumentLoadSuccess}  > 
         <div ref={scrollContainerRef} className="pdfPagesContainer" style={{ position: 'relative', overflowY: 'auto', overflowX: 'hidden', height: '100vh',width:"100%", overflow : 'auto' }}> 
           {/* , height: '100vh', width: '100%' */}
@@ -264,8 +270,8 @@ console.log("csv file", csvFile);
             Array.from({ length: numPages }, (_, index) => index + 1).map((pageNumber) => (
               <div key={pageNumber} className="pdfPage" style={{ position: "relative" }}>
                 <Page pageNumber={pageNumber} renderTextLayer={false} renderAnnotationLayer={false} 
-                width={595} // Width in points
-                height={841} // height in points
+                width={595.2755905511812} // Width in points
+                height={841.8897637795277} // height in points
                 // height={1100}
                 onLoadSuccess={(page) => handlePageLoadSuccess(page, pageNumber)}
                />
@@ -293,7 +299,7 @@ console.log("csv file", csvFile);
                     bounds={{
                       left: 0, // Allow movement to the left beyond 0
                       top: 0,
-                      right: pageDimensions[pageNumber]?.width - 52 || 0, //tagData.width 
+                      right: pageDimensions[pageNumber]?.width - 68 || 0, //tagData.width 52,68
                       bottom: pageDimensions[pageNumber]?.height - 26 || 0, // tagData.height
                     }}
                     onDrag={(e, data) => updateTextBoxData(pageNumber, index, { x: data.x, y: data.y })}
@@ -353,6 +359,7 @@ console.log("csv file", csvFile);
       <button onClick={handleGeneratePdf} style={{ margin: '10px', padding: '10px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
         Generate PDF
       </button>
+    </div>
     </div>
   );
 }
